@@ -27,7 +27,7 @@ function init() {
     el.style = 'position:fixed; right:0; top:0;z-index: 99999;background: burlywood;'
     el.innerHTML = `   
         <input type="button" value="历史价格查询" id='btnSearch' />
-        <input type="button" value="隐藏" id='btnHide' />
+        <input type="button" value="展开" id='btnHide' />
         <div id='message'></div>
         <div id='chart-price-histrory' style="height:500px;width:1000px; display:none">
         </div>   
@@ -52,8 +52,10 @@ function registerEvents() {
         })
     }
 
-    btnHide.onclick = function(){
-        chartEl.style.display = 'none';
+    btnHide.onclick = function () {
+        var isVisible = chartEl.style.display === 'block';
+        btnHide.value = isVisible ? '展开' : '关闭';
+        chartEl.style.display = isVisible ? 'none' : 'block';
     }
 }
 
