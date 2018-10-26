@@ -89,7 +89,7 @@ function executeSearchHistotry(requestUrl, success, error) {
 
 
 function checkIsCommodityPage(url) {
-    return url.indexOf('item.jd.com') >= 0;
+    return url.indexOf('item.jd.') >= 0;
 }
 
 
