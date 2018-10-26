@@ -1,0 +1,37 @@
+{
+    "manifest_version": 2,
+    "name": "JD Price History",
+    "version": "1.0.0",
+    "description": "京东商品历史价格查询",
+    "icons": {
+        "128": "icon128.png",
+        "32": "icon32.png",
+        "48": "icon48.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "16": "icon16.png",
+            "32": "icon32.png",
+            "48": "icon48.png"
+        },
+        "default_popup": "index.html",
+        "default_title": "检查商品的历史价格"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "js": [
+                "content/md5.js",
+                "content/encrypt.js",
+                "content/index.js"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "permissions": [    
+        "https://*/",
+        "http://*/",
+        "https://*.manmanbuy.com/",
+        "http://*.manmanbuy.com/"
+    ]
+}
