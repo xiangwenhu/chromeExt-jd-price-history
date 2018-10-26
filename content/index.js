@@ -1,6 +1,6 @@
 
 // listen for checkForWord request, call getTags which includes callback to sendResponse
-chrome.runtime.onMessage.addListener(
+/* chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.action === 'searchHistory') {
 
@@ -14,7 +14,49 @@ chrome.runtime.onMessage.addListener(
             return true;
         }
     }
-);
+); */
+
+
+init();
+registerEvents();
+
+
+function init() {
+
+    var el = document.createElement('div');
+    el.style = 'position:fixed; right:0; top:0;z-index: 99999;background: burlywood;'
+    el.innerHTML = `   
+        <input type="button" value="历史价格查询" id='btnSearch' />
+        <input type="button" value="隐藏" id='btnHide' />
+        <div id='message'></div>
+        <div id='chart-price-histrory' style="height:500px;width:1000px; display:none">
+        </div>   
+    `;
+    document.body.appendChild(el);
+
+}
+
+
+function registerEvents() {
+    var btnSearch = document.getElementById('btnSearch');
+    var messageEl = document.getElementById('message');
+    var chartEl = document.getElementById('chart-price-histrory');
+    var btnHide = document.getElementById('btnHide');
+    btnSearch.onclick = function () {
+        chartEl.style.display = 'block';
+        var url = getRequestUrl(window.location.href);
+        executeSearchHistotry(window.location.href, function (res) {
+            handlerData(res);
+        }, function (res) {
+            handlerData(res);
+        })
+    }
+
+    btnHide.onclick = function(){
+        chartEl.style.display = 'none';
+    }
+}
+
 
 
 function getRequestUrl(requestUrl) {
@@ -87,9 +129,84 @@ function executeSearchHistotry(requestUrl, success, error) {
 
 }
 
-
 function checkIsCommodityPage(url) {
     return url.indexOf('item.jd.') >= 0;
 }
 
 
+function handlerData(res) {
+    if (res.code === 10000) {
+        res.data = res.data || '{}';
+        var data = JSON.parse(res.data);
+        var lowPrice = +data.lowerPrice;
+        var lowerDate = new Date(data.lowerDate.split('(')[1].split('-')[0]).toLocaleDateString();
+        var spName = data.spName;
+        var changePriceCount = data.changePriceCount;
+        var objData = prepareData(data.datePrice || []);
+
+        renderChart(spName, objData);
+    } else {
+        appendMessage('code:' + res.code + '    message:', res.message);
+    }
+}
+
+function appendMessage(message) {
+    messageEl.innerHTML += message + '<br>'
+}
+
+function renderChart(title, data) {
+    var myChart = echarts.init(document.getElementById('chart-price-histrory'));
+
+    var data = data.reverse().slice(0, 50).reverse();
+
+    var xData = data.map(function (d) {
+        return d.date;
+    });
+
+    var yData = data.map(function (d) {
+        return d.price;
+    });
+
+    var option = {
+        title: {
+            text: title,
+        },
+        tooltip: {
+            formatter: "{b0}: {c0}"
+        },
+        xAxis: {
+            type: 'category',
+            data: xData
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: yData,
+            type: 'line',
+            markPoint: {
+                data: [
+                    { type: 'max', name: '最大值' },
+                    { type: 'min', name: '最小值' }
+                ]
+            }
+        }]
+    };
+
+
+    myChart.setOption(option);
+
+}
+
+
+function prepareData(dataStr) {
+    var dataArr = dataStr.split('],');
+    return dataArr.map(function (d) {
+        //[Date.UTC(2017,8,19),3899.00]
+        var dArr = (d + ']').replace(/\[|\]/ig, '').replace(/,/ig, '-').split(')')
+        return {
+            price: Math.abs(+dArr[1]),
+            date: new Date(dArr[0].split('(')[1]).toLocaleDateString()
+        }
+    })
+}

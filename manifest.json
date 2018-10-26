@@ -21,6 +21,7 @@
         {
             "matches": ["http://*/*", "https://*/*"],
             "js": [
+                "content/echarts.common.min.js",
                 "content/md5.js",
                 "content/encrypt.js",
                 "content/index.js"
