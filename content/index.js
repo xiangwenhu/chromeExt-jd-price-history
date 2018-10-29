@@ -18,11 +18,24 @@
 
 
 init();
-registerEvents();
-
 
 function init() {
 
+    if (shouldRegister()) {
+        registerHTML();
+        registerEvents();
+    }
+
+}
+
+function shouldRegister() {
+    if (document.location.hostname.indexOf('.jd.') >= 0) {
+        return true;
+    }
+    return false;
+}
+
+function registerHTML() {
     var el = document.createElement('div');
     el.style = 'position:fixed; right:0; top:0;z-index: 99999;background: burlywood;'
     el.innerHTML = `   
@@ -33,22 +46,22 @@ function init() {
         </div>   
     `;
     document.body.appendChild(el);
-
 }
 
-
+var messageEl;
 function registerEvents() {
     var btnSearch = document.getElementById('btnSearch');
-    var messageEl = document.getElementById('message');
+    messageEl = document.getElementById('message');
     var chartEl = document.getElementById('chart-price-histrory');
     var btnHide = document.getElementById('btnHide');
     btnSearch.onclick = function () {
         chartEl.style.display = 'block';
+        btnHide.value = '关闭';
         var url = getRequestUrl(window.location.href);
         executeSearchHistotry(window.location.href, function (res) {
             handlerData(res);
         }, function (res) {
-            handlerData(res);
+            handlerError(res);
         })
     }
 
@@ -59,10 +72,7 @@ function registerEvents() {
     }
 }
 
-
-
 function getRequestUrl(requestUrl) {
-
     requestUrl = requestUrl.split('?')[0].split('#')[0];
     var url = escape(requestUrl);
     var token = d.encrypt(requestUrl, 2, true);
@@ -76,7 +86,6 @@ function getRequestUrl(requestUrl) {
     return urlArr.join('');
 
 }
-
 
 function http_get(options) {
     var timeout = options.onTimeout
@@ -102,18 +111,16 @@ function http_get(options) {
     xhr.send();
 }
 
-
-
 // Returns the index of the first instance of the desired word on the page.
 function executeSearchHistotry(requestUrl, success, error) {
     var isCommodityPage = checkIsCommodityPage(requestUrl);
     if (!isCommodityPage) {
-        return error && error({ code: 7000, message: '无效的地址' });
+        return error && error({ code: 7000, message: '无效的商品地址页' });
     }
 
     var url = getRequestUrl(requestUrl);
     if (!url) {
-        return error && error({ code: 7000, message: '无效的地址' });
+        return error && error({ code: 7000, message: '获取商品历史价格查询地址失败' });
     }
 
     http_get({
@@ -125,7 +132,7 @@ function executeSearchHistotry(requestUrl, success, error) {
             return error && error({ code: 7002, message: statusText });
         },
         timeout: function () {
-            return error && error({ code: 7003, message: '无效的地址' });
+            return error && error({ code: 7003, message: '请求超时请重试' });
         }
     })
 
@@ -134,7 +141,6 @@ function executeSearchHistotry(requestUrl, success, error) {
 function checkIsCommodityPage(url) {
     return url.indexOf('item.jd.') >= 0;
 }
-
 
 function handlerData(res) {
     if (res.code === 10000) {
@@ -152,14 +158,23 @@ function handlerData(res) {
     }
 }
 
-function appendMessage(message) {
-    messageEl.innerHTML += message + '<br>'
+function prepareData(dataStr) {
+    var dataArr = dataStr.split('],');
+    return dataArr.map(function (d) {
+        //[Date.UTC(2017,8,19),3899.00]
+        var dArr = (d + ']').replace(/\[|\]/ig, '').replace(/,/ig, '-').split(')')
+        return {
+            price: Math.abs(+dArr[1]),
+            date: new Date(dArr[0].split('(')[1]).toLocaleDateString()
+        }
+    })
 }
+
 
 function renderChart(title, data) {
     var myChart = echarts.init(document.getElementById('chart-price-histrory'));
 
-    var data = data.reverse().slice(0, 50).reverse();
+    var data = data.reverse().slice(0, 100).reverse();
 
     var xData = data.map(function (d) {
         return d.date;
@@ -195,20 +210,14 @@ function renderChart(title, data) {
         }]
     };
 
-
     myChart.setOption(option);
+}
 
+function appendMessage(message) {
+    messageEl.innerHTML += message + '<br>'
 }
 
 
-function prepareData(dataStr) {
-    var dataArr = dataStr.split('],');
-    return dataArr.map(function (d) {
-        //[Date.UTC(2017,8,19),3899.00]
-        var dArr = (d + ']').replace(/\[|\]/ig, '').replace(/,/ig, '-').split(')')
-        return {
-            price: Math.abs(+dArr[1]),
-            date: new Date(dArr[0].split('(')[1]).toLocaleDateString()
-        }
-    })
+function handlerError(res) {
+    appendMessage(res.message || '发生未知错误, 请重试')
 }
