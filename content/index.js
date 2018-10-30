@@ -42,7 +42,7 @@ function registerHTML() {
         <input type="button" value="历史价格查询" id='btnSearch' />
         <input type="button" value="展开" id='btnHide' />
         <div id='message'></div>
-        <div id='chart-price-histrory' style="height:500px;width:1000px; display:none">
+        <div id='chart-price-histrory' style="height:250px;width:1200px; display:none">
         </div>   
     `;
     document.body.appendChild(el);
