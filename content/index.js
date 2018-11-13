@@ -29,10 +29,8 @@ function init() {
 }
 
 function shouldRegister() {
-    if (document.location.hostname.indexOf('.jd.') >= 0) {
-        return true;
-    }
-    return false;
+    const hostName = document.location.hostname
+    return checkIsCommodityPage(hostName)
 }
 
 function registerHTML() {
