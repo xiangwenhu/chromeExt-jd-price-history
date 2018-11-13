@@ -3,23 +3,20 @@
     "name": "JD Price History",
     "version": "1.0.0",
     "description": "京东商品历史价格查询",
-    "icons": {
-        "128": "icon128.png",
-        "32": "icon32.png",
-        "48": "icon48.png"
-    },
     "browser_action": {
         "default_icon": {
-            "16": "icon16.png",
-            "32": "icon32.png",
-            "48": "icon48.png"
+            "128": "icons/icon128.png",
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png"
         },
-        "default_popup": "index.html",
         "default_title": "检查商品的历史价格"
     },
     "content_scripts": [
         {
-            "matches": ["http://*/*", "https://*/*"],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
             "js": [
                 "content/echarts.common.min.js",
                 "content/md5.js",
@@ -29,10 +26,28 @@
             "run_at": "document_end"
         }
     ],
-    "permissions": [    
+    "homepage_url": "https://github.com/xiangwenhu",
+    "icons": {
+        "128": "icons/icon128.png",
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png"
+    },
+    "permissions": [
+        "contextMenus",
+        "tabs",
+        "notifications",
+        "webRequest",
+        "webRequestBlocking",
+        "storage",
         "https://*/",
         "http://*/",
         "https://*.manmanbuy.com/",
         "http://*.manmanbuy.com/"
+    ],
+    "omnibox": {
+        "keyword": "Price"
+    },
+    "web_accessible_resources": [
+        "icons/icon16.png"
     ]
 }
