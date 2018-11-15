@@ -142,6 +142,12 @@ function checkIsCommodityPage(url) {
 
 function handlerData(res) {
     if (res.code === 10000) {
+
+        if(!res.data){
+            appendMessage('未查询到商品的相关信息');
+            return
+        }
+
         res.data = res.data || '{}';
         var data = JSON.parse(res.data);
         var lowPrice = +data.lowerPrice;
@@ -151,7 +157,7 @@ function handlerData(res) {
         var objData = prepareData(data.datePrice || []);
 
         renderChart(spName, objData);
-    } else {
+    }else{ 
         appendMessage('code:' + res.code + '    message:', res.message);
     }
 }
