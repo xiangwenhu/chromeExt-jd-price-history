@@ -151,10 +151,10 @@ function handlerData(res) {
         res.data = res.data || '{}';
         var data = JSON.parse(res.data);
         var lowPrice = +data.lowerPrice;
-        var lowerDate = new Date(data.lowerDate.split('(')[1].split('-')[0]).toLocaleDateString();
+        var lowerDate = data_string(data.lowerDate)
         var spName = data.spName;
         var changePriceCount = data.changePriceCount;
-        var objData = prepareData(data.datePrice || []);
+        var objData = prepareData(data.listPrice || []);
 
         renderChart(spName, objData);
     }else{ 
@@ -162,16 +162,25 @@ function handlerData(res) {
     }
 }
 
-function prepareData(dataStr) {
-    var dataArr = dataStr.split('],');
-    return dataArr.map(function (d) {
-        //[Date.UTC(2017,8,19),3899.00]
-        var dArr = (d + ']').replace(/\[|\]/ig, '').replace(/,/ig, '-').split(')')
+function prepareData(listPrice) {
+   
+    return listPrice.map(function (d) {      
         return {
-            price: Math.abs(+dArr[1]),
-            date: new Date(dArr[0].split('(')[1]).toLocaleDateString()
+            price: d.pr,
+            date: data_string(d.dt)
         }
     })
+}
+
+function data_string(str) {
+    var d = eval('new ' + str.substr(1, str.length - 2));
+    var ar_date = [d.getFullYear(), d.getMonth() + 1, d.getDate() ];
+    var ar_time = [d.getHours(), d.getMinutes(), d.getSeconds()];
+    for (var i = 0; i < ar_date.length; i++) ar_date[i] = dFormat(ar_date[i]);
+    for (var i = 0; i < ar_time.length; i++) ar_time[i] = dFormat(ar_time[i]);
+    return ar_date.join('-')+" "+ar_time.join(':');
+
+    function dFormat(i) { return i < 10 ? "0" + i.toString() : i; }
 }
 
 
