@@ -145,7 +145,7 @@ function executeSearchHistotry(requestUrl, success, error) {
 }
 
 function checkIsCommodityPage(url) {
-  return url.indexOf("item.jd.") || url.indexOf("item.yiyaojd.") >= 0;
+  return url.indexOf("item.jd.") >= 0 || url.indexOf("item.yiyaojd.") >= 0;
 }
 
 function modifyUrl(url) {
