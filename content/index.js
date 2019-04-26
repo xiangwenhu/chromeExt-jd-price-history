@@ -78,7 +78,7 @@ function getRequestUrl(requestUrl) {
 
   var urlArr = [];
   urlArr.push(
-    "http://localhost:6006/api/history.aspx?DA=1&action=gethistory&url="
+    "https://babydairy2017.cloudapp.net:6006/api/history.aspx?DA=1&action=gethistory&url="
   );
   urlArr.push(url);
   urlArr.push("&bjid=&spbh=&cxid=&zkid=&w=951&token=");
